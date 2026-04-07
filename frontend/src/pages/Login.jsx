@@ -270,6 +270,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    
     if (!validateForm()) {
       return;
     }
@@ -277,26 +280,23 @@ const Login = () => {
     try {
       setLoading(true);
       
-      console.log(email , password)
-
+      console.log(trimmedEmail, trimmedPassword)
       
-      const  res = await API.post(ConstantApi.auth.login ,{email ,password})
-
-      console.log( res , " this is my response of login")
-
+      
+      const res = await API.post(ConstantApi.auth.login, { email: trimmedEmail, password: trimmedPassword })
       if (res.data.success) {
-          dispatch(setCredentials({ department: res.data.department, token: res.data.token }))
+          dispatch(setCredentials(res.data.department))
         if (rememberMe) {
-          localStorage.setItem('rememberedEmail', email);
-          localStorage.setItem('rememberedPassword', password);
+          localStorage.setItem('rememberedEmail', trimmedEmail);
+          localStorage.setItem('rememberedPassword', trimmedPassword);
         } else {
           localStorage.removeItem('rememberedEmail');
           localStorage.removeItem('rememberedPassword');
         }
         
         // Store authentication data
-        // localStorage.setItem('token', res.data.token); // Removed, handled by reducer
-        // localStorage.setItem('department', JSON.stringify(res.data.department)); // Removed, handled by reducer
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('department', JSON.stringify(res.data.department));
         
         showToast(LoginConfig.messages.loginSuccess, 'success');
         
