@@ -49,6 +49,10 @@ const Dashboard = () => {
   // New state for selected date tasks
   const [selectedDateTasks, setSelectedDateTasks] = useState([]);
   const [dateLoading, setDateLoading] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(true);
+  
+  // State to store random icons for new departments
+  const [randomDepartmentIcons, setRandomDepartmentIcons] = useState({});
 
   const department = useSelector(state => state.auth)
 
@@ -57,6 +61,55 @@ const Dashboard = () => {
   const loggedInDepartment = department?.department?.department || "ADMIN";
   const dispatch = useDispatch();
   const dropdownRef = useRef(null);
+
+  // Array of available icons for random assignment
+  const availableIcons = [
+    CheckCircle, Box, Layers, ShoppingCart, BarChart3, 
+    Server, Users, Settings, Activity, Building2, AlertCircle, Flag
+  ];
+
+  // Function to get random icon
+  const getRandomIcon = () => {
+    return availableIcons[Math.floor(Math.random() * availableIcons.length)];
+  };
+
+  // Store random icons for new departments
+  useEffect(() => {
+    if (allDepartments.length > 0) {
+      const iconMap = {
+        'QC': CheckCircle,
+        'PRDN': Box,
+        'DESIGN': Layers,
+        'STORE': ShoppingCart,
+        'PRCHS': BarChart3,
+        'AC': BarChart3,
+        'IT': Server,
+        'SALES': Users,
+        'ADMIN': Settings,
+        'MNTNS': Activity,
+        'admin': Settings,
+        'it': Server,
+        'design': Layers,
+        'sales': Users,
+        'store': ShoppingCart,
+        'qc': CheckCircle,
+        'prdns': Box,
+        'prchs': BarChart3,
+        'ac': BarChart3,
+        'mntns': Activity,
+      };
+
+      const newIcons = { ...randomDepartmentIcons };
+      allDepartments.forEach(deptName => {
+        const upperDept = deptName.toUpperCase();
+        // If department doesn't have a predefined icon and no random icon yet, assign one
+        if (!iconMap[upperDept] && !newIcons[upperDept]) {
+          newIcons[upperDept] = getRandomIcon();
+        }
+      });
+      setRandomDepartmentIcons(newIcons);
+    }
+  }, [allDepartments]);
 
   // Fetch departments from backend
   useEffect(() => {
@@ -107,10 +160,15 @@ const Dashboard = () => {
     
     // If backend data is loaded, use it
     if (allDepartments.length > 0) {
-      return allDepartments.map(deptName => ({
-        name: deptName.toUpperCase(),
-        icon: iconMap[deptName.toUpperCase()] || Building2
-      }));
+      return allDepartments.map(deptName => {
+        const upperDept = deptName.toUpperCase();
+        // Use predefined icon if exists, otherwise use the random assigned icon
+        const icon = iconMap[upperDept] || randomDepartmentIcons[upperDept] || Building2;
+        return {
+          name: upperDept,
+          icon: icon
+        };
+      });
     }
     
     // Fallback to static departments while loading or if no data
@@ -126,7 +184,7 @@ const Dashboard = () => {
       { name: "ADMIN", icon: Settings },
       { name: "MNTNS", icon: Activity },
     ];
-  }, [allDepartments]);
+  }, [allDepartments, randomDepartmentIcons]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -780,43 +838,52 @@ const Dashboard = () => {
                 <h2 className="text-[#1A237E] font-bold">
                   📅 {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' }).toUpperCase()} {currentYear}
                 </h2>
-                <CalendarIcon className="w-5 h-5 text-[#1A237E]" />
+                <button
+                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  className="p-1 hover:bg-gray-100 rounded-md transition"
+                >
+                  <CalendarIcon className="w-5 h-5 text-[#1A237E]" />
+                </button>
               </div>
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {weekDays.map((day) => (
-                  <div key={day.key} className="text-center text-gray-500 text-xs font-bold py-1">
-                    {day.label}
+              {isCalendarOpen && (
+                <>
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {weekDays.map((day) => (
+                      <div key={day.key} className="text-center text-gray-500 text-xs font-bold py-1">
+                        {day.label}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map((day, idx) => {
-                  const isToday = day.date.toDateString() === new Date().toDateString();
-                  const hasTask = tasksAssignedToMyDept.some(
-                    (task) => task.dueDate === day.date.toISOString().split("T")[0]
-                  );
-                  const isSelected = selectedDate && day.date.toDateString() === selectedDate.toDateString();
+                  <div className="grid grid-cols-7 gap-1">
+                    {calendarDays.map((day, idx) => {
+                      const isToday = day.date.toDateString() === new Date().toDateString();
+                      const hasTask = tasksAssignedToMyDept.some(
+                        (task) => task.dueDate === day.date.toISOString().split("T")[0]
+                      );
+                      const isSelected = selectedDate && day.date.toDateString() === selectedDate.toDateString();
 
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleDateClick(day.date)}
-                      className={`h-10 rounded-md text-sm font-semibold transition ${day.isCurrentMonth ? "text-gray-800" : "text-gray-300"
-                        } ${isSelected
-                          ? "bg-[#1A237E] text-white"
-                          : isToday
-                            ? "bg-[#FF9933] text-white"
-                            : "hover:bg-gray-100"
-                        }`}
-                    >
-                      {day.date.getDate()}
-                      {hasTask && day.isCurrentMonth && !isSelected && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#FF9933] mx-auto mt-0.5"></div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleDateClick(day.date)}
+                          className={`h-10 rounded-md text-sm font-semibold transition ${day.isCurrentMonth ? "text-gray-800" : "text-gray-300"
+                            } ${isSelected
+                              ? "bg-[#1A237E] text-white"
+                              : isToday
+                                ? "bg-[#FF9933] text-white"
+                                : "hover:bg-gray-100"
+                            }`}
+                        >
+                          {day.date.getDate()}
+                          {hasTask && day.isCurrentMonth && !isSelected && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#FF9933] mx-auto mt-0.5"></div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* View Toggle Buttons */}
@@ -859,12 +926,12 @@ const Dashboard = () => {
                   ) : (
                     <div className="divide-y">
                       {filteredTasksIAssigned.map((task) => (
-                        <div key={task._id} onClick={() => handleTaskClick(task)} className="p-3 hover:bg-gray-50 cursor-pointer">
+                        <div key={task._id} onClick={() => handleTaskClick(task)} className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}>
                           <div className="flex items-start gap-2">
                             {task.status === "completed" ? (
-                              <div className="w-3 h-3 rounded-full bg-green-500 mt-0.5"></div>
+                              <div className="w-4 h-4 rounded-full bg-green-500 mt-0.5"></div>
                             ) : (
-                              <div className="w-3 h-3 rounded-full bg-red-500 mt-0.5"></div>
+                              <div className="w-4 h-4 rounded-full bg-red-500 mt-0.5"></div>
                             )}
                             <div className="flex-1">
                               <p className="text-sm font-semibold text-gray-800">{task.title}</p>
@@ -898,14 +965,14 @@ const Dashboard = () => {
                   ) : filteredTasksAssignedToMe.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">No tasks assigned to you</div>
                   ) : (
-                    <div className="divide-y">
+                    <div className="divide-y ">
                       {filteredTasksAssignedToMe.map((task) => (
-                        <div key={task._id} onClick={() => handleTaskClick(task)} className="p-3 hover:bg-gray-50 cursor-pointer">
+                        <div key={task._id} onClick={() => handleTaskClick(task)} className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}>
                           <div className="flex items-start gap-2">
-                            {task.status === "completed" ? (
-                              <div className="w-3 h-3 rounded-full bg-green-500 mt-0.5"></div>
+                            {task.status === "completed" ? ( 
+                              <div className="w-4 h-4 rounded-full bg-green-500 mt-0.5"></div>
                             ) : (
-                              <div className="w-3 h-3 rounded-full bg-red-500 mt-0.5"></div>
+                              <div className="w-4 h-4 rounded-full bg-red-500 mt-0.5"></div>
                             )}
                             <div className="flex-1">
                               <p className={`text-sm font-semibold ${task.status === "completed" ? "text-gray-400 line-through" : "text-gray-800"}`}>
@@ -952,13 +1019,13 @@ const Dashboard = () => {
                         <div
                           key={task._id}
                           onClick={() => handleTaskClick(task)}
-                          className="p-3 hover:bg-gray-50 cursor-pointer transition"
+                         className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}
                         >
                           <div className="flex items-start gap-2">
                             {task.status === "completed" ? (
-                              <div className="w-3 h-3 rounded-full bg-green-500 mt-0.5"></div>
+                              <div className="w-4 h-4 rounded-full bg-green-500 mt-0.5"></div>
                             ) : (
-                              <div className="w-3 h-3 rounded-full bg-red-500 mt-0.5"></div>
+                              <div className="w-4 h-4 rounded-full bg-red-500 mt-0.5"></div>
                             )}
                             <div className="flex-1">
                               <p className={`text-sm font-semibold ${task.status === "completed" ? "text-gray-400 line-through" : "text-gray-800"}`}>
