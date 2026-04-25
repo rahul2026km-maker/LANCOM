@@ -41,7 +41,7 @@ const Dashboard = () => {
   const [tasksICreated, setTasksICreated] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // State for dynamic departments from backend
+  // Statedfsd for dynamic departments from backend
   const [allDepartments, setAllDepartments] = useState([]);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const [selectedDateTasks, setSelectedDateTasks] = useState([]);
   const [dateLoading, setDateLoading] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(true);
-  
+
   // State to store random icons for new departments
   const [randomDepartmentIcons, setRandomDepartmentIcons] = useState({});
 
@@ -64,7 +64,7 @@ const Dashboard = () => {
 
   // Array of available icons for random assignment
   const availableIcons = [
-    CheckCircle, Box, Layers, ShoppingCart, BarChart3, 
+    CheckCircle, Box, Layers, ShoppingCart, BarChart3,
     Server, Users, Settings, Activity, Building2, AlertCircle, Flag
   ];
 
@@ -118,7 +118,7 @@ const Dashboard = () => {
         setLoadingDepartments(true);
         const res = await API.post(ConstantApi.task.getAllDepartment);
         console.log(res, " this is my response ");
-        
+
         // Extract departments from response
         if (res.data && res.data.data) {
           setAllDepartments(res.data.data);
@@ -157,7 +157,7 @@ const Dashboard = () => {
       'ac': BarChart3,
       'mntns': Activity,
     };
-    
+
     // If backend data is loaded, use it
     if (allDepartments.length > 0) {
       return allDepartments.map(deptName => {
@@ -170,7 +170,7 @@ const Dashboard = () => {
         };
       });
     }
-    
+
     // Fallback to static departments while loading or if no data
     return [
       { name: "QC", icon: CheckCircle },
@@ -614,7 +614,7 @@ const Dashboard = () => {
               <span className="text-[#1A237E] font-bold text-xl">◎</span>
             </div>
             <div>
-              <h1 className="text-white font-bold text:lg sm:text-xl tracking-wide">LANCOM</h1>
+              <h1 className="text-white font-bold text:lg sm:text-xl tracking-wide"> HONTO'S LANCOM</h1>
               <p className="text-[#FFE0B2] text-xs">Welcome Back {(department?.department?.headName)?.toUpperCase()}</p>
             </div>
           </div>
@@ -969,7 +969,7 @@ const Dashboard = () => {
                       {filteredTasksAssignedToMe.map((task) => (
                         <div key={task._id} onClick={() => handleTaskClick(task)} className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}>
                           <div className="flex items-start gap-2">
-                            {task.status === "completed" ? ( 
+                            {task.status === "completed" ? (
                               <div className="w-4 h-4 rounded-full bg-green-500 mt-0.5"></div>
                             ) : (
                               <div className="w-4 h-4 rounded-full bg-red-500 mt-0.5"></div>
@@ -1019,7 +1019,7 @@ const Dashboard = () => {
                         <div
                           key={task._id}
                           onClick={() => handleTaskClick(task)}
-                         className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}
+                          className={`p-3 hover:bg-gray-50 cursor-pointer   ${task.status === "completed" ? "bg-green-100 " : "bg-pink-100"} border border-gray-300`}
                         >
                           <div className="flex items-start gap-2">
                             {task.status === "completed" ? (
