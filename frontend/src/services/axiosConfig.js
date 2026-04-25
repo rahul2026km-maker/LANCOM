@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: 'https://thick-ties-draw.loca.lt/api',
   headers: {
     'ngrok-skip-browser-warning': 'true',
-    'bypass-tunnel-reminder': 'true' // For localtunnel
+    'bypass-tunnel-reminder': 'true'
   }
 });
 
