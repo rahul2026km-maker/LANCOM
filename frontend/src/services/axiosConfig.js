@@ -1,7 +1,11 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: 'https://thick-ties-draw.loca.lt/api',
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'bypass-tunnel-reminder': 'true' // For localtunnel
+  }
 });
 
 // Automatically add token to every request
